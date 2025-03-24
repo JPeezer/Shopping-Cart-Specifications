@@ -3,14 +3,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ShoppingCart {
+    /*@ public invariant total >= 0;
+      @ public invariant(\forall Item i; cart.containsKey(i) ==> cart.get(i) >=0);
+    @*/
     public HashMap<Item, Integer> cart;
     public int total;
-
+    
+    /*@ ensures cart.isEmpty();
+      @ ensures total == 0;
+    @*/
     public ShoppingCart() {
         this.cart = new HashMap<>();
         this.total = 0;
     }
 
+    /*@ requires itemName != null; 
+      @ requires quantity >= 0;
+      @ ensures cart.containsKey(itemName);
+      @ ensures cart.get(itemName) >= \old(cart.containsKey(itemName) ? cart.get(itemName) : 0);
+      @ ensures total >= \old(total);
+    @*/
     public void addItem(Item itemName, int quantity) {
 
         // If item exists, update quantity
@@ -25,6 +37,11 @@ public class ShoppingCart {
         updateTotal();
     }
 
+    /*@ requires itemName != null; 
+      @ requires quantity >= 0;
+      @ ensures !cart.containsKey(itemName) || cart.get(itemName) >= 0;
+      @ ensures total <= \old(total);
+    @*/
     public void removeItem(Item itemName, int quantity) {
         // Item must exist
         if (cart.containsKey(itemName)) {
@@ -38,6 +55,10 @@ public class ShoppingCart {
         }
     }
 
+    /*@ ensures total >= 0;
+      @ ensures (\forall int j; 0 <= j && j < cart.size();
+      @             (\exists Item i; cart.containsKey(i) && total >= i.price * cart.get(i)));             
+    @*/
     private void updateTotal() {
         int newTotal = 0;
 
@@ -52,16 +73,19 @@ public class ShoppingCart {
         total = newTotal;
     }
 
+    /*@ ensures \result >= 0;
+      @ ensures \result == total;
+    @*/
     public int getTotal() {
         return total;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        String result = "";
         for (Item item : cart.keySet()) {
-            sb.append(item.name).append(": ").append(cart.get(item)).append("\n");
+            result += item.name + ": " + cart.get(item) + "\n";
         }
-        return sb.toString();
+        return result;
     }
 }
